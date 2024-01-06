@@ -1,67 +1,51 @@
-import { json } from "express";
-import express from "express";
+import express, { json } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-// import notesModel from "./models/Notes";
+import { notesModel } from "./models/notes";
+import "./mongo";
 
 const app = express();
+
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect(
-  ""
-);
-
-app.get("/notes", (req, res) => {
-  notesModel.find({}, (err, result) => {
-    if (err) {
-      res.json(err);
-    } else {
-      res.json(result);
-    }
-  });
+app.get("/notes", async (req, res) => {
+  const notes = await notesModel.find({});
+  res.json(notes);
 });
 
 app.post("/notes", async (req, res) => {
-  const note = req.body;
-  const newNote = new notesModel(note);
+  const { note, title } = req.body;
+
+  const newNote = new notesModel({ note, title });
   await newNote.save();
 
   res.json(note);
 });
 
-app.delete("/notes", (req, res) => {
-  const id = req.body._id;
+app.get("/notes/:id", async (req, res) => {
+  const id = req.params.id;
 
-  notesModel.findByIdAndDelete(id, (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log("Deleted Note!");
-    }
-  });
+  const notes = await notesModel.findById(id).exec();
+
+  res.json(notes);
 });
 
-app.put("/notes", (req, res) => {
-  const id = req.body._id;
+app.put("/notes/:id", async (req, res) => {
+  const id = req.params.id;
   const newTitle = req.body.title;
   const newContent = req.body.content;
 
-  console.log("_id: " + id);
-  console.log("updatedTitle: " + newTitle);
-  console.log("updatedContent: " + newContent);
+  let newNote = await notesModel.findByIdAndUpdate(id, { title: newTitle, content: newContent }).exec();
 
-  notesModel.findByIdAndUpdate(
-    id,
-    { title: newTitle, content: newContent },
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log("Note Updated.");
-      }
-    }
-  );
+  res.json(newNote);
+});
+
+app.delete("/notes/:id", async (req, res) => {
+  const id = req.params.id;
+  let x = await notesModel.findByIdAndDelete(id).exec();
+
+  res.json(x)
 });
 
 app.listen(4000, () => {
