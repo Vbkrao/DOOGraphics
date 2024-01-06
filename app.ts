@@ -15,9 +15,12 @@ app.get("/notes", async (req, res) => {
 });
 
 app.post("/notes", async (req, res) => {
-  const { note, title } = req.body;
+  const { content, title } = req.body;
 
-  const newNote = new notesModel({ note, title });
+  const newNote = new notesModel({
+    title: title,
+    content: content,
+  });
   await newNote.save();
 
   res.json(newNote);
@@ -33,10 +36,9 @@ app.get("/notes/:id", async (req, res) => {
 
 app.put("/notes/:id", async (req, res) => {
   const id = req.params.id;
-  const newTitle = req.body.title;
-  const newContent = req.body.content;
+  const { title, content } = req.body;
 
-  let newNote = await notesModel.findByIdAndUpdate(id, { title: newTitle, content: newContent }).exec();
+  let newNote = await notesModel.findByIdAndUpdate(id, { title, content }).exec();
 
   res.json(newNote);
 });
@@ -45,8 +47,7 @@ app.delete("/notes/:id", async (req, res) => {
   const id = req.params.id;
   let x = await notesModel.findByIdAndDelete(id).exec();
 
-  res.json(x)
+  res.json(x);
 });
 
-export {app};
-
+export { app };

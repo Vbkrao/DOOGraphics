@@ -3,21 +3,27 @@ import test from "node:test";
 
 import { app } from "../app";
 
-test("intergration tests", async (t) => {
-  let req = await fetch("http://localhost:3000/notes", {
+async function init(){
+  let req = await fetch("http://127.0.0.1:4000/notes", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ title: "test", body: "test" }),
+    body: JSON.stringify({ title: "test", content: "test" }),
   });
   let res = await req.json() as {title: string, _id: string};
-  
-  let id = res._id;
-  let title = res.title;
+
+  return {
+    id: res._id,
+    title: res.title
+  }
+}
+
+test("intergration tests", async (t) => {
+  let {id, title} = await init();
 
   await t.test("test 2 - Get note by id", async (t) => {
-    let req = await fetch(`http://localhost:3000/notes/${id}`, {
+    let req = await fetch(`http://127.0.0.1:4000/notes/${id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -28,7 +34,7 @@ test("intergration tests", async (t) => {
   });
 
   await t.test("test 3 - delete note by id", async (t) => {
-    let req = await fetch(`http://localhost:3000/notes/${id}`, {
+    let req = await fetch(`http://127.0.0.1:4000/notes/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

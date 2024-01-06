@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-mongoose.connect("mongodb+srv://vbkrao2020:RQo8U2qjeWAtZOfF@cluster0.yrpl3zl.mongodb.net/?retryWrites=true&w=majority");
+mongoose.connect("mongodb+srv://vbkrao2024:LF5Y0v6wTZpzGOSu@doographics.yopjqll.mongodb.net");
 let connection = mongoose.connection;
 
 connection.on("connected", () =>
