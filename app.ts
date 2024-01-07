@@ -1,8 +1,6 @@
-import express, { json } from "express";
-import mongoose from "mongoose";
+import express from "express";
 import cors from "cors";
 import { notesModel } from "./models/notes";
-import "./mongo";
 
 const app = express();
 
@@ -10,26 +8,45 @@ app.use(express.json());
 app.use(cors());
 
 app.get("/notes", async (req, res) => {
-  const notes = await notesModel.find({});
+  const notes = await notesModel.find({}).exec();
   res.json(notes);
 });
 
 app.post("/notes", async (req, res) => {
   const { content, title } = req.body;
 
+  let checkTitleUniqueness = await notesModel.findOne({ title: title }).exec();
+
+  if (!content || !title) {
+    return res.status(400).json({
+      error: "Missing content or title",
+    });
+  } else if (checkTitleUniqueness) {
+    return res.status(400).json({
+      error: "Title must be unique",
+    });
+  }
+
   const newNote = new notesModel({
     title: title,
     content: content,
   });
-  await newNote.save();
+  let note = await newNote.save();
 
-  res.json(newNote);
+  res.json(note);
 });
 
 app.get("/notes/:id", async (req, res) => {
   const id = req.params.id;
+  let notes;
 
-  const notes = await notesModel.findById(id).exec();
+  try {
+    notes = await notesModel.findById(id).exec();
+  } catch (e) {
+    return res.status(404).json({
+      error: "Note not found",
+    });
+  }
 
   res.json(notes);
 });
@@ -38,14 +55,31 @@ app.put("/notes/:id", async (req, res) => {
   const id = req.params.id;
   const { title, content } = req.body;
 
-  let newNote = await notesModel.findByIdAndUpdate(id, { title, content }).exec();
+  let newNote;
+
+  try {
+    newNote = await notesModel.findByIdAndUpdate(id, { title, content }).exec();
+  } catch (e) {
+    return res.status(404).json({
+      error:
+        "Note not found or title must be unique or missing content or title",
+    });
+  }
 
   res.json(newNote);
 });
 
 app.delete("/notes/:id", async (req, res) => {
   const id = req.params.id;
-  let x = await notesModel.findByIdAndDelete(id).exec();
+  let x;
+
+  try {
+    x = await notesModel.findByIdAndDelete(id).exec();
+  } catch (e) {
+    return res.status(400).json({
+      error: "Error Deleting Note",
+    });
+  }
 
   res.json(x);
 });
