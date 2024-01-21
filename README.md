@@ -1,4 +1,4 @@
-# Note taking RESTFUL API 
+# RESTFUL API- Notes Application
 
 Developed a RESTful API for a simple note-taking application using Node.js. The API allows users to create, read, update, and delete notes.
 
